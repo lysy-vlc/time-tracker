@@ -1,0 +1,146 @@
+<template>
+  <Timer
+    v-if="tasksStore.currentTask"
+    :animate="isCounterOn"
+    :time="displayTime"
+    :title="tasksStore.currentTask?.name"
+    :isCounterOn="isCounterOn"
+    @on-start="startCounter"
+    @on-pause="pauseCounter"
+    @on-stop="finishCounter"
+  />
+</template>
+
+<script setup lang="ts">
+import Timer from '~/components/organisms/Timer.vue'
+
+import { useTasksStore } from '~/stores/tasks'
+import { finishTask, getCurrentTask } from '~/services/tasks'
+import { createInterval, fetchCurrentTaskIntervals, finishInterval } from '~/services/intervals'
+import { useUIStore } from '~/stores/ui'
+
+const tasksStore = useTasksStore()
+const route = useRoute()
+const client = useSupabaseClient()
+const user = useSupabaseUser()
+const uiStore = useUIStore()
+
+const displayTime = ref('')
+const isCounterOn = ref(false)
+let counter: undefined | number = undefined
+
+const fetchCurrentTask = async () => {
+  const { tasks, error } = await getCurrentTask(route.params.id, client)
+
+  if (tasks) {
+    tasksStore.setCurrentTask(tasks[0])
+
+    return
+  }
+
+  uiStore.showSnackbar('Couldn\'t fetch current task. Please, reload this page!', 'error')
+  return
+}
+
+const getCurrentIntervals = async () => {
+  const { intervals, error } = await fetchCurrentTaskIntervals(route.params.id as string, client)
+
+  if (intervals) {
+    tasksStore.setCurrentTaskIntervals(intervals)
+
+    return
+  }
+
+  uiStore.showSnackbar('Couldn\'t fetch current intervals. Please, reload this page!', 'error')
+  return
+}
+
+const getCurrentTimeHoursMinutesSecondsFormat = (milliseconds: number) => {
+  let seconds = Math.floor((milliseconds / 1000) % 60)
+  let minutes = Math.floor((milliseconds / (1000 * 60)) % 60)
+  let hours = Math.floor((milliseconds / (1000 * 60 * 60)) % 24)
+
+  const displayHours = (hours < 10) ? '0' + hours : hours
+  const displayMinutes = (minutes < 10) ? '0' + minutes : minutes
+  const displaySeconds = (seconds < 10) ? '0' + seconds : seconds
+
+  return displayHours + ':' + displayMinutes + ':' + displaySeconds
+}
+
+const count = () => {
+  counter = setInterval(() => {
+    if (tasksStore.currentTaskIntervals) {
+      const intervalsSummedUp = tasksStore.getIntervalsSummedUp()
+      const nowMilliseconds = new Date().getTime()
+
+      const lastInterval = tasksStore.currentTaskIntervals[tasksStore.currentTaskIntervals.length - 1]
+      const startTimeMilliseconds = new Date(lastInterval.created_at || '').getTime()
+
+      displayTime.value = getCurrentTimeHoursMinutesSecondsFormat(nowMilliseconds - startTimeMilliseconds + intervalsSummedUp)
+    }
+  }, 1000)
+}
+
+const finishCounter = async () => {
+  if (tasksStore.currentTask && !tasksStore.currentTask) {
+    const lastInterval = [ ...tasksStore.currentTaskIntervals ].pop()
+    const finishedInterval = await finishInterval(lastInterval?.id as string, client)
+    const { data, error } = await finishTask(tasksStore.currentTask.id, client)
+
+    if (data) {
+      tasksStore.updateLastInterval(data[0])
+      isCounterOn.value = false
+      clearInterval(counter)
+    }
+
+    return
+  }
+
+  uiStore.showSnackbar('Task has been finished', 'success')
+  return navigateTo('/tasks/create-task')
+}
+
+const startCounter = async () => {
+  if (tasksStore.currentTask && user.value) {
+    const { data, error } = await createInterval(tasksStore.currentTask.id, user.value.id, client)
+
+    if (data && data[0]) {
+      tasksStore.addCurrentTaskInterval(data[0])
+      isCounterOn.value = true
+      count()
+    }
+  }
+}
+
+const pauseCounter = async () => {
+  const lastInterval = [ ...tasksStore.currentTaskIntervals ].pop()
+
+  if (lastInterval) {
+    const currentFinishedInterval = await finishInterval(lastInterval.id, client)
+
+    if (currentFinishedInterval.data) {
+      tasksStore.addCurrentTaskInterval(currentFinishedInterval.data[0])
+
+      isCounterOn.value = false
+      clearInterval(counter)
+    }
+  }
+}
+
+onMounted(async () => {
+  if (!tasksStore.currentTask) {
+    await Promise.all([fetchCurrentTask(), getCurrentIntervals()])
+  }
+
+  const lastInterval = [ ...tasksStore.currentTaskIntervals ].pop()
+
+  console.log('elo 1', !lastInterval.finished_at)
+  if (!lastInterval.finished_at) {
+    console.log('elo', lastInterval.finished_at)
+    count()
+    isCounterOn.value = true
+  }
+})
+</script>
+
+<style scoped lang="scss"></style>
