@@ -13,7 +13,16 @@
     <v-navigation-drawer
       v-model="drawer"
       temporary
-    ></v-navigation-drawer>
+    >
+      <v-list nav>
+        <v-list-item
+          v-for="(navItem, index) in navItems"
+          @click="navigateTo(navItem.path)"
+          :title="navItem.name"
+          :value="navItem.name"
+        />
+      </v-list>
+    </v-navigation-drawer>
 
     <v-main>
       <v-container class="fill-height main-container">
@@ -41,6 +50,17 @@ const uiStore = useUIStore()
 const drawer = ref(false)
 
 const user = useSupabaseUser()
+
+const navItems = [
+  {
+    name: 'tasks',
+    path: '/tasks'
+  },
+  {
+    name: 'create task',
+    path: '/tasks/create-task'
+  }
+]
 
 const logout = async () => {
   const client = useSupabaseAuthClient()
