@@ -127,6 +127,7 @@ const pauseCounter = async () => {
   }
 }
 
+// @ts-ignore
 onMounted(async () => {
   if (!tasksStore.currentTask) {
     await Promise.all([fetchCurrentTask(), getCurrentIntervals()])
@@ -134,9 +135,7 @@ onMounted(async () => {
 
   const lastInterval = [ ...tasksStore.currentTaskIntervals ].pop()
 
-  console.log('elo 1', !lastInterval.finished_at)
-  if (!lastInterval.finished_at) {
-    console.log('elo', lastInterval.finished_at)
+  if (!lastInterval?.finished_at) {
     count()
     isCounterOn.value = true
   }
