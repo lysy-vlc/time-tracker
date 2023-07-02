@@ -55,10 +55,10 @@ const client = useSupabaseClient()
 const emit = defineEmits(['on-create-task'])
 
 const task = reactive({
-  name: 'dsfsf',
-  duration: 300,
-  brake_interval: 300,
-  type: 'work'
+  name: '',
+  duration: 0,
+  brake_interval: 0,
+  type: ''
 })
 
 const durationOptions = ref([])

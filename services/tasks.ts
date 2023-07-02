@@ -24,3 +24,12 @@ export const finishTask = async (taskId: string, client: SupabaseClient) => {
     error,
   }
 }
+
+export const fetchAllTasks = async (id: string, client: SupabaseClient) => {
+  const { data: tasks, error } = await client.from('tasks').select('*')
+
+  return {
+    tasks,
+    error,
+  }
+}
