@@ -9,6 +9,8 @@
     @on-pause="pauseCounter"
     @on-stop="finishCounter"
   />
+
+  <IntervalsTable/>
 </template>
 
 <script setup lang="ts">
@@ -18,6 +20,8 @@ import { useTasksStore } from '~/stores/tasks'
 import { finishTask, getCurrentTask } from '~/services/tasks'
 import { createInterval, fetchCurrentTaskIntervals, finishInterval } from '~/services/intervals'
 import { useUIStore } from '~/stores/ui'
+import IntervalsTable from '~/components/molecules/IntervalsTable.vue'
+import { Database } from '~/types/supabase'
 
 definePageMeta({
   middleware: 'auth'
@@ -25,7 +29,7 @@ definePageMeta({
 
 const tasksStore = useTasksStore()
 const route = useRoute()
-const client = useSupabaseClient()
+const client = useSupabaseClient<Database>()
 const user = useSupabaseUser()
 const uiStore = useUIStore()
 
@@ -131,6 +135,12 @@ const pauseCounter = async () => {
   }
 }
 
+const showCurrentTimeSpent = () => {
+  const intervalsSummedUp = tasksStore.getIntervalsSummedUp()
+
+  displayTime.value = getCurrentTimeHoursMinutesSecondsFormat(intervalsSummedUp)
+}
+
 // @ts-ignore
 onMounted(async () => {
   if (!tasksStore.currentTask) {
@@ -142,7 +152,11 @@ onMounted(async () => {
   if (!lastInterval?.finished_at) {
     count()
     isCounterOn.value = true
+
+    return
   }
+
+  showCurrentTimeSpent()
 })
 </script>
 

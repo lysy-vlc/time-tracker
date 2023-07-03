@@ -1,6 +1,6 @@
 import { createError } from 'h3'
-import { Database } from '~~/types/database.types'
 import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server'
+import { Database } from '~/types/supabase'
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)
@@ -8,7 +8,11 @@ export default defineEventHandler(async (event) => {
 
   if (!user) throw createError({ statusMessage: 'user not found' })
 
-  const { data, error } = await client.from('tasks').select('id, title, completed').eq('user', user.id).order('created_at')
+  const { data, error } = await client
+    .from('tasks')
+    .select('id, title, completed')
+    .eq('user', user.id)
+    .order('created_at')
   if (error) {
     throw createError({ statusMessage: error.message })
   }

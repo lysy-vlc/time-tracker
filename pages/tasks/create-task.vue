@@ -15,12 +15,13 @@ import HexagonalSpinner from '~/components/atoms/HexagonalSpinner.vue'
 import CreateTaskForm from '~/components/molecules/CreateTaskForm.vue'
 import { useTasksStore } from '~/stores/tasks'
 import { createInterval } from '~/services/intervals'
+import { Database } from '~/types/supabase'
 
 definePageMeta({
   middleware: 'auth'
 })
 
-const client = useSupabaseClient()
+const client = useSupabaseClient<Database>()
 
 const user = useSupabaseUser()
 

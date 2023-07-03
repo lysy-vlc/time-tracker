@@ -52,3 +52,20 @@ export const finishInterval = async (
     error,
   }
 }
+
+export const rateIntervalRequest = async (
+  intervalId: string,
+  rating: number,
+  client: SupabaseClient
+) => {
+  const { data, error } = await client
+    .from('intervals')
+    .update({ rating: rating })
+    .eq('id', intervalId)
+    .select()
+
+  return {
+    data,
+    error,
+  }
+}

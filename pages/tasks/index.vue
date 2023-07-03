@@ -10,11 +10,19 @@
               </th>
 
               <th class="text-left">
+                Task type
+              </th>
+
+              <th class="text-left">
                   Is finished
               </th>
 
               <th class="text-left">
                 Created at
+              </th>
+
+              <th class="text-left">
+                Go to task
               </th>
             </tr>
           </thead>
@@ -24,8 +32,16 @@
               :key="task.name"
             >
               <td>{{ task.name }}</td>
-              <td>{{ task.is_finished }}</td>
-              <td>{{ task.created_at }}</td>
+
+              <td>{{ task.type }}</td>
+
+              <td>{{ task.is_finished ? 'Yes' : 'No' }}</td>
+
+              <td>{{ new Date(task.created_at).toLocaleString() }}</td>
+
+              <td>
+                <v-btn v-if="!task.is_finished" @click="navigateTo('/tasks/current-task/' + task.id)">Go to task</v-btn>
+              </td>
             </tr>
           </tbody>
         </v-table>
@@ -37,6 +53,7 @@
 <script setup lang="ts">
 import { useTasksStore } from '~/stores/tasks'
 import { fetchAllTasks } from '~/services/tasks'
+import { Database } from '~/types/supabase'
 
 definePageMeta({
   middleware: 'auth'
@@ -44,7 +61,7 @@ definePageMeta({
 
 const tasksStore = useTasksStore()
 const user = useSupabaseUser()
-const client = useSupabaseClient()
+const client = useSupabaseClient<Database>()
 
 // @ts-ignore
 onMounted(async () => {
