@@ -19,6 +19,10 @@ import { finishTask, getCurrentTask } from '~/services/tasks'
 import { createInterval, fetchCurrentTaskIntervals, finishInterval } from '~/services/intervals'
 import { useUIStore } from '~/stores/ui'
 
+definePageMeta({
+  middleware: 'auth'
+})
+
 const tasksStore = useTasksStore()
 const route = useRoute()
 const client = useSupabaseClient()

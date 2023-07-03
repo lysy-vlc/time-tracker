@@ -37,7 +37,10 @@ const login = async () => {
       password: password.value,
     })
 
+    console.log('logowanie udane', data, error)
+
     if (data.user) {
+      console.log('logowanie udane')
       email.value = ''
       password.value = ''
 

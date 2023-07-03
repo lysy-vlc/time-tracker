@@ -38,6 +38,10 @@
 import { useTasksStore } from '~/stores/tasks'
 import { fetchAllTasks } from '~/services/tasks'
 
+definePageMeta({
+  middleware: 'auth'
+})
+
 const tasksStore = useTasksStore()
 const user = useSupabaseUser()
 const client = useSupabaseClient()

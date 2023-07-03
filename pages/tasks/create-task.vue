@@ -16,6 +16,10 @@ import CreateTaskForm from '~/components/molecules/CreateTaskForm.vue'
 import { useTasksStore } from '~/stores/tasks'
 import { createInterval } from '~/services/intervals'
 
+definePageMeta({
+  middleware: 'auth'
+})
+
 const client = useSupabaseClient()
 
 const user = useSupabaseUser()
