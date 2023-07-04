@@ -69,3 +69,15 @@ export const rateIntervalRequest = async (
     error,
   }
 }
+
+export const fetchAllIntervals = async (client: SupabaseClient) => {
+  const { data: intervals, error } = await client
+    .from('intervals')
+    .select('*')
+    .order('created_at', { ascending: true })
+
+  return {
+    intervals,
+    error,
+  }
+}

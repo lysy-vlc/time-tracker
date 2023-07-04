@@ -1,6 +1,6 @@
 import { Database } from '~/types/supabase'
 import { Ref } from 'vue'
-import { rateIntervalRequest } from '~/services/intervals'
+import { fetchAllIntervals, rateIntervalRequest } from '~/services/intervals'
 import { SupabaseClient } from '@supabase/supabase-js'
 
 export const useTasksStore = defineStore('tasks', () => {
@@ -14,6 +14,10 @@ export const useTasksStore = defineStore('tasks', () => {
     [] | Database['public']['Tables']['intervals']['Row'][]
   > = ref([])
 
+  const allIntervals: Ref<
+    [] | Database['public']['Tables']['intervals']['Row'][]
+  > = ref([])
+
   const setCurrentTask = (
     task: Database['public']['Tables']['tasks']['Row']
   ) => {
@@ -22,6 +26,13 @@ export const useTasksStore = defineStore('tasks', () => {
 
   const setTasks = (tasks: Database['public']['Tables']['tasks']['Row'][]) => {
     allTasks.value = tasks
+  }
+
+  const getIntervals = async (client: SupabaseClient) => {
+    const intervalsResponse = await fetchAllIntervals(client)
+
+    if (intervalsResponse.intervals)
+      allIntervals.value = intervalsResponse.intervals
   }
 
   const addCurrentTaskInterval = (
@@ -78,7 +89,8 @@ export const useTasksStore = defineStore('tasks', () => {
     if (rateIntervalResponse.data && rateIntervalResponse.data[0]) {
       currentTaskIntervals.value = currentTaskIntervals.value.map(
         (interval) => {
-          if (interval.id === intervalId) return rateIntervalResponse.data[0]
+          if (rateIntervalResponse.data && interval.id === intervalId)
+            return rateIntervalResponse.data[0]
 
           return interval
         }
@@ -101,5 +113,7 @@ export const useTasksStore = defineStore('tasks', () => {
     allTasks,
     setTasks,
     rateInterval,
+    allIntervals,
+    getIntervals,
   }
 })
