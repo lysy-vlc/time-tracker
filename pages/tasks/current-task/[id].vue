@@ -127,7 +127,7 @@ const pauseCounter = async () => {
     const currentFinishedInterval = await finishInterval(lastInterval.id, client)
 
     if (currentFinishedInterval.data) {
-      tasksStore.addCurrentTaskInterval(currentFinishedInterval.data[0])
+      tasksStore.updateLastInterval(currentFinishedInterval.data[0])
 
       isCounterOn.value = false
       clearInterval(counter)

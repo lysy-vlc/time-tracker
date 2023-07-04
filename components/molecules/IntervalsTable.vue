@@ -33,7 +33,7 @@
             >
               <td>{{ new Date(interval.created_at).toLocaleString() }}</td>
 
-              <td>{{ new Date(interval.finished_at).toLocaleString() }}</td>
+              <td>{{ interval.finished_at ? new Date(interval.finished_at).toLocaleString() : '' }}</td>
 
               <td class="py-2">
                 <v-expansion-panels>
