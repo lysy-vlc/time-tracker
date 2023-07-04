@@ -9,6 +9,8 @@
     @on-pause="pauseCounter"
     @on-stop="finishCounter"
   />
+
+  <IntervalsTable/>
 </template>
 
 <script setup lang="ts">
@@ -18,10 +20,17 @@ import { useTasksStore } from '~/stores/tasks'
 import { finishTask, getCurrentTask } from '~/services/tasks'
 import { createInterval, fetchCurrentTaskIntervals, finishInterval } from '~/services/intervals'
 import { useUIStore } from '~/stores/ui'
+import IntervalsTable from '~/components/molecules/IntervalsTable.vue'
+import { Database } from '~/types/supabase'
+import { getCurrentTimeHoursMinutesSecondsFormat } from '~/helpers/time'
+
+definePageMeta({
+  middleware: 'auth'
+})
 
 const tasksStore = useTasksStore()
 const route = useRoute()
-const client = useSupabaseClient()
+const client = useSupabaseClient<Database>()
 const user = useSupabaseUser()
 const uiStore = useUIStore()
 
@@ -53,18 +62,6 @@ const getCurrentIntervals = async () => {
 
   uiStore.showSnackbar('Couldn\'t fetch current intervals. Please, reload this page!', 'error')
   return
-}
-
-const getCurrentTimeHoursMinutesSecondsFormat = (milliseconds: number) => {
-  let seconds = Math.floor((milliseconds / 1000) % 60)
-  let minutes = Math.floor((milliseconds / (1000 * 60)) % 60)
-  let hours = Math.floor((milliseconds / (1000 * 60 * 60)) % 24)
-
-  const displayHours = (hours < 10) ? '0' + hours : hours
-  const displayMinutes = (minutes < 10) ? '0' + minutes : minutes
-  const displaySeconds = (seconds < 10) ? '0' + seconds : seconds
-
-  return displayHours + ':' + displayMinutes + ':' + displaySeconds
 }
 
 const count = () => {
@@ -119,12 +116,18 @@ const pauseCounter = async () => {
     const currentFinishedInterval = await finishInterval(lastInterval.id, client)
 
     if (currentFinishedInterval.data) {
-      tasksStore.addCurrentTaskInterval(currentFinishedInterval.data[0])
+      tasksStore.updateLastInterval(currentFinishedInterval.data[0])
 
       isCounterOn.value = false
       clearInterval(counter)
     }
   }
+}
+
+const showCurrentTimeSpent = () => {
+  const intervalsSummedUp = tasksStore.getIntervalsSummedUp()
+
+  displayTime.value = getCurrentTimeHoursMinutesSecondsFormat(intervalsSummedUp)
 }
 
 // @ts-ignore
@@ -138,7 +141,11 @@ onMounted(async () => {
   if (!lastInterval?.finished_at) {
     count()
     isCounterOn.value = true
+
+    return
   }
+
+  showCurrentTimeSpent()
 })
 </script>
 

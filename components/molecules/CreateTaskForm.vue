@@ -50,7 +50,9 @@
 </template>
 
 <script setup lang="ts">
-const client = useSupabaseClient()
+import { Database } from '~/types/supabase'
+
+const client = useSupabaseClient<Database>()
 
 const emit = defineEmits(['on-create-task'])
 

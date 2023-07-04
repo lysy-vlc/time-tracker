@@ -15,12 +15,13 @@
       temporary
     >
       <v-list nav>
-        <v-list-item
-          v-for="(navItem, index) in navItems"
-          @click="navigateTo(navItem.path)"
-          :title="navItem.name"
-          :value="navItem.name"
-        />
+        <template v-for="(navItem, index) in navItems">
+          <v-list-item
+            @click="navigateTo(navItem.path)"
+            :title="navItem.name"
+            :value="navItem.name"
+          />
+        </template>
       </v-list>
     </v-navigation-drawer>
 
@@ -39,11 +40,18 @@
         {{ uiStore.snackbarText }}
       </v-snackbar>
     </v-main>
+
+    <v-dialog
+      v-model="uiStore.overlay"
+    >
+      <component :is="dialogComponent"/>
+    </v-dialog>
   </v-layout>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { useUIStore } from '~/stores/ui'
+import Login from '~/components/organisms/LoginForm.vue'
 
 const uiStore = useUIStore()
 
@@ -51,24 +59,59 @@ const drawer = ref(false)
 
 const user = useSupabaseUser()
 
+const client = useSupabaseClient()
+
+const route = await useRoute()
+
+const router = useRouter()
+
+const dynamicComponents = {
+  'login-form': Login
+}
+
+const dialogComponent =  computed(() => defineComponent(dynamicComponents[uiStore.overlayContent]))
+
 const navItems = [
   {
-    name: 'tasks',
+    name: 'Tasks',
     path: '/tasks'
   },
   {
-    name: 'create task',
+    name: 'Create task',
     path: '/tasks/create-task'
+  },
+  {
+    name: 'Login',
+    path: '/auth/login'
+  },
+  {
+    name: 'Create account',
+    path: '/auth/create-account'
   }
 ]
 
 const logout = async () => {
   const client = useSupabaseAuthClient()
 
-  await client.auth.signOut()
-
   navigateTo('/auth')
+
+  await client.auth.signOut()
 }
+
+onMounted(async () => {
+  await router.isReady()
+  client.auth.onAuthStateChange((event, session) => {
+    if (session?.user?.aud !== 'authenticated'
+      && (route.name !== 'auth-create-account'
+        || route.name !== 'auth-login'
+        || route.name !== 'auth'
+        || route.name !== 'account'
+      )
+    ) {
+      uiStore.showOverlay('login-form')
+    }
+  })
+})
 </script>
 
 <style scoped lang="scss">
