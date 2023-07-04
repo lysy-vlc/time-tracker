@@ -22,6 +22,10 @@
               </th>
 
               <th class="text-left">
+                Duration
+              </th>
+
+              <th class="text-left">
                 Rate interval
               </th>
             </tr>
@@ -34,6 +38,8 @@
               <td>{{ new Date(interval.created_at).toLocaleString() }}</td>
 
               <td>{{ interval.finished_at ? new Date(interval.finished_at).toLocaleString() : '' }}</td>
+
+              <td>{{ getDuration(interval) }}</td>
 
               <td class="py-2">
                 <v-expansion-panels>
@@ -59,6 +65,7 @@
 import { useTasksStore } from '~/stores/tasks'
 import { useUIStore } from '~/stores/ui'
 import { Database } from '~/types/supabase'
+import { getCurrentTimeHoursMinutesSecondsFormat } from '~/helpers/time'
 
 const uiStore = useUIStore()
 
@@ -71,6 +78,15 @@ const rateInterval = async (rating: number, intervalId: string, index: number) =
   if (response) return uiStore.showSnackbar('Interval has been rated', 'success')
 
   return uiStore.showSnackbar('Couldn\'t rate interval. Try again!', 'error')
+}
+
+const getDuration = (interval: Database['public']['Tables']['intervals']['Row']): string => {
+  if (interval.created_at && interval.finished_at) {
+    const differenceInMiliseconds = new Date(interval.finished_at).getTime() - new Date(interval.created_at).getTime()
+    return getCurrentTimeHoursMinutesSecondsFormat(differenceInMiliseconds)
+  }
+
+  return ''
 }
 </script>
 
