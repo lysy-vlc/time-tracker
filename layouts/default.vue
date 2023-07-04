@@ -61,11 +61,9 @@ const user = useSupabaseUser()
 
 const client = useSupabaseClient()
 
-const route = useRoute()
+const route = await useRoute()
 
-client.auth.onAuthStateChange((event, session) => {
-  if (session?.user?.aud !== 'authenticated' && route.name !== 'auth-create-account' && route.name !== 'auth-login') uiStore.showOverlay('login-form')
-})
+const router = useRouter()
 
 const dynamicComponents = {
   'login-form': Login
@@ -99,6 +97,21 @@ const logout = async () => {
 
   await client.auth.signOut()
 }
+
+onMounted(async () => {
+  await router.isReady()
+  client.auth.onAuthStateChange((event, session) => {
+    if (session?.user?.aud !== 'authenticated'
+      && (route.name !== 'auth-create-account'
+        || route.name !== 'auth-login'
+        || route.name !== 'auth'
+        || route.name !== 'account'
+      )
+    ) {
+      uiStore.showOverlay('login-form')
+    }
+  })
+})
 </script>
 
 <style scoped lang="scss">

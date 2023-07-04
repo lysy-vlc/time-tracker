@@ -27,8 +27,10 @@
 <script setup lang="ts">
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Ref } from 'vue'
+import { useUIStore } from '~/stores/ui'
 
 const client: SupabaseClient = useSupabaseAuthClient()
+const uiStore = useUIStore()
 
 const email: Ref<string> = ref('')
 const password: Ref<string> = ref('')
@@ -48,7 +50,7 @@ const login = async () => {
       email.value = ''
       password.value = ''
 
-      console.log(data)
+      uiStore.hideOverlay()
 
       return await navigateTo('/account')
     }
