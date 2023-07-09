@@ -10,7 +10,7 @@
 
     <v-row>
       <v-col>
-        <v-table>
+        <v-table class="table">
           <thead>
             <tr>
               <th class="text-left">
@@ -77,7 +77,7 @@ const rateInterval = async (rating: number, intervalId: string, index: number) =
 
   if (response) return uiStore.showSnackbar('Interval has been rated', 'success')
 
-  return uiStore.showSnackbar('Couldn\'t rate interval. Try again!', 'error')
+  return uiStore.showSnackbar('Couldn\'t rate interval. Please, reload this page!', 'error')
 }
 
 const getDuration = (interval: Database['public']['Tables']['intervals']['Row']): string => {
@@ -90,4 +90,12 @@ const getDuration = (interval: Database['public']['Tables']['intervals']['Row'])
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.table {
+  max-width: 100%;
+
+  tr {
+    max-width: 100%
+  }
+}
+</style>

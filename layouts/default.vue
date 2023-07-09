@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-app-bar :elevation="2" prominent>
+    <v-app-bar :elevation="2">
       <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title>TimeTracker</v-toolbar-title>
@@ -12,7 +12,7 @@
 
     <v-navigation-drawer
       v-model="drawer"
-      temporary
+      absolute
     >
       <v-list nav>
         <template v-for="(navItem, index) in navItems">

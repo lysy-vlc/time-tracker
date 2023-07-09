@@ -16,6 +16,7 @@ import CreateTaskForm from '~/components/molecules/CreateTaskForm.vue'
 import { useTasksStore } from '~/stores/tasks'
 import { createInterval } from '~/services/intervals'
 import { Database } from '~/types/supabase'
+import { useUIStore } from '~/stores/ui'
 
 definePageMeta({
   middleware: 'auth'
@@ -26,8 +27,10 @@ const client = useSupabaseClient<Database>()
 const user = useSupabaseUser()
 
 const tasksStore = useTasksStore()
+const uiStore = useUIStore()
 
 const createTask = async (task) => {
+  if (!user.value) return
 
   task = {
     ...task,
@@ -39,24 +42,24 @@ const createTask = async (task) => {
     .insert(task)
     .select()
 
-  if (data[0]) {
+  if (data && data[0]) {
     tasksStore.setCurrentTask(data[0])
 
     const createIntervalResponse = await createInterval(data[0].id, user.value.id, client)
 
-    if (createIntervalResponse.data[0]) {
+    if (createIntervalResponse.data && createIntervalResponse.data[0]) {
 
-      tasksStore.addCurrentTaskInterval(createIntervalResponse.data[0])
+      tasksStore.setCurrentTaskIntervals(createIntervalResponse.data)
       return await navigateTo(`/tasks/current-task/${data[0].id}`)
     }
 
-    showSnackbar('Something went wrong with task start. Try again!', 'error')
+    uiStore.showSnackbar('Something went wrong with task start. Please, reload this page!', 'error')
     console.error(createIntervalResponse.error)
 
     return
   }
 
-  showSnackbar('Something went wrong with task creation. Try again!', 'error')
+  uiStore.showSnackbar('Something went wrong with task creation. Please, reload this page!', 'error')
   console.error(error)
 
   return

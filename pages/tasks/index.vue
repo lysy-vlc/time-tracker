@@ -46,7 +46,7 @@
               <td>{{ getTaskDurationInHoursMinutesSecondsFormat(task.id) }}</td>
 
               <td>
-                <v-btn v-if="!task.is_finished" @click="navigateTo('/tasks/current-task/' + task.id)">Go to task</v-btn>
+                <v-btn @click="navigateTo('/tasks/current-task/' + task.id)">Go to task</v-btn>
               </td>
             </tr>
           </tbody>
