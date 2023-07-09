@@ -1,5 +1,4 @@
 import { SupabaseClient } from '@supabase/supabase-js'
-import { Database } from '~/types/supabase'
 
 export const createInterval = async (
   taskId: string,

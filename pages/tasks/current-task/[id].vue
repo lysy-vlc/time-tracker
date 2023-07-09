@@ -57,6 +57,8 @@ const fetchCurrentTask = async () => {
 const getCurrentIntervals = async () => {
   const { intervals, error } = await fetchCurrentTaskIntervals(route.params.id as string, client)
 
+  console.log(intervals)
+
   if (intervals) {
     tasksStore.setCurrentTaskIntervals(intervals)
 
@@ -146,9 +148,7 @@ const showCurrentTimeSpent = () => {
 
 // @ts-ignore
 onMounted(async () => {
-  if (!tasksStore.currentTask) {
-    await Promise.all([fetchCurrentTask(), getCurrentIntervals()])
-  }
+  await Promise.all([fetchCurrentTask(), getCurrentIntervals()])
 
   const lastInterval = [ ...tasksStore.currentTaskIntervals ].pop()
 

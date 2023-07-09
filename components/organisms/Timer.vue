@@ -41,7 +41,7 @@
         </TransitionGroup>
       </v-col>
 
-      <v-col cols="12" v-else>
+      <v-col cols="12">
         <v-btn @click="navigateTo('/tasks')" block>Go to tasks</v-btn>
       </v-col>
     </v-col>

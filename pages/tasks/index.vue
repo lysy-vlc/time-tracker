@@ -8,7 +8,12 @@
           class="elevation-1"
         >
           <template v-slot:item.is_finished="{ item }">
-            {{ item.raw.is_finished ? 'Yes' : 'No' }}
+            <template v-if="item.raw.is_finished">Yes</template>
+            <template v-else>
+              <div class="py-2">
+                <HexagonalSpinner :animate="true" height="50px" width="50px"/>
+              </div>
+            </template>
           </template>
 
           <template v-slot:item.created_at="{ item }">
@@ -37,6 +42,7 @@ import { Database } from '~/types/supabase'
 import { sumUpIntervalsDuration } from '~/helpers/intervals'
 import { getCurrentTimeHoursMinutesSecondsFormat } from '~/helpers/time'
 import { useDisplay } from 'vuetify'
+import HexagonalSpinner from '~/components/atoms/HexagonalSpinner.vue'
 
 definePageMeta({
   middleware: 'auth'
@@ -50,7 +56,7 @@ const { smAndDown } = useDisplay()
 
 const mobileHeaders = [
   { title: 'Name', key: 'name' },
-  { title: 'Task type', key: 'type' },
+  { title: 'Go to task', key: 'go_to_task' },
 ]
 
 const desktopHeaders = [
@@ -71,7 +77,7 @@ const getTaskDurationInHoursMinutesSecondsFormat = (taskId: string): string => {
 
 // @ts-ignore
 onMounted(async () => {
-  if (user.value && !tasksStore.allTasks.length) {
+  if (user.value) {
     const { tasks, error } = await fetchAllTasks(user.value.id, client)
     tasksStore.setTasks(tasks)
 

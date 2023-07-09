@@ -41,8 +41,6 @@ const props = defineProps({
 }
 
 .spinner-container {
-  min-width: 100px;
-  min-height: 100px;
 
   .spinner {
     width: 100%;
