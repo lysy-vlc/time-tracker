@@ -1,7 +1,7 @@
 <template>
   <v-row align="center">
     <v-col cols="12" md="6" class="pa-9">
-      <HexagonalSpinner width="100%" height="100%" :animate="props.animate"/>
+      <HexagonalSpinner width="500px" height="500px" :animate="props.animate"/>
     </v-col>
 
     <v-col cols="12" md="6">
