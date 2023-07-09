@@ -12,7 +12,8 @@
 
     <v-navigation-drawer
       v-model="drawer"
-      absolute
+      position="left"
+      :permanent="!smAndDown"
     >
       <v-list nav>
         <template v-for="(navItem, index) in navItems">
@@ -50,8 +51,12 @@
 </template>
 
 <script setup>
-import { useUIStore } from '~/stores/ui'
 import Login from '~/components/organisms/LoginForm.vue'
+import { useUIStore } from '~/stores/ui'
+import { useDisplay } from 'vuetify'
+
+const { smAndDown } = useDisplay()
+
 
 const uiStore = useUIStore()
 
