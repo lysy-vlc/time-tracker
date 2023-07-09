@@ -1,10 +1,17 @@
 <template>
-  <div class="spinner-container" :style="{ 'max-width': width, 'max-height': height }">
+  <div
+    class="spinner-container"
+    :style="{ 'max-width': smAndDown ? '150px' : width, 'max-height': smAndDown ? '150px' : height }"
+  >
     <img src="/images/hexagonal-spinner.svg" alt="" class="spinner" :class="{ 'animate': animate }">
   </div>
 </template>
 
 <script lang="ts" setup>
+import { useDisplay } from 'vuetify'
+
+const { smAndDown } = useDisplay()
+
 const props = defineProps({
   width: {
     type: String,

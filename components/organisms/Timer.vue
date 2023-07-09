@@ -1,6 +1,6 @@
 <template>
   <v-row align="center">
-    <v-col cols="12" md="6" class="pa-9">
+    <v-col cols="12" md="6" class="pa-9 d-flex justify-center">
       <HexagonalSpinner width="500px" height="500px" :animate="props.animate"/>
     </v-col>
 

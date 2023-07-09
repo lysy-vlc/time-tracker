@@ -2,66 +2,41 @@
   <v-container>
     <v-row>
       <v-col>
-        <v-table>
-          <thead>
-            <tr>
-              <th class="text-left">
-                Name
-              </th>
+        <v-data-table
+          :headers="smAndDown ? mobileHeaders : desktopHeaders"
+          :items="tasksStore.allTasks"
+          class="elevation-1"
+        >
+          <template v-slot:item.is_finished="{ item }">
+            {{ item.raw.is_finished ? 'Yes' : 'No' }}
+          </template>
 
-              <th class="text-left">
-                Task type
-              </th>
+          <template v-slot:item.created_at="{ item }">
+            {{ new Date(item.raw.created_at).toLocaleString() }}
+          </template>
 
-              <th class="text-left">
-                  Is finished
-              </th>
+          <template v-slot:item.duration="{ item }">
+            {{ getTaskDurationInHoursMinutesSecondsFormat(item.raw.id) }}
+          </template>
 
-              <th class="text-left">
-                Created at
-              </th>
-
-              <th class="text-left">
-                Duration
-              </th>
-
-              <th class="text-left">
-                Go to task
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(task, index) in tasksStore.allTasks"
-              :key="task.name"
-            >
-              <td>{{ task.name }}</td>
-
-              <td>{{ task.type }}</td>
-
-              <td>{{ task.is_finished ? 'Yes' : 'No' }}</td>
-
-              <td>{{ new Date(task.created_at).toLocaleString() }}</td>
-
-              <td>{{ getTaskDurationInHoursMinutesSecondsFormat(task.id) }}</td>
-
-              <td>
-                <v-btn @click="navigateTo('/tasks/current-task/' + task.id)">Go to task</v-btn>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
+          <template v-slot:item.go_to_task="{ item }">
+            <v-btn @click="navigateTo('/tasks/current-task/' + item.raw.id)">Go to task</v-btn>
+          </template>
+        </v-data-table>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script setup lang="ts">
+import { VDataTable } from 'vuetify/labs/VDataTable'
+
 import { useTasksStore } from '~/stores/tasks'
 import { fetchAllTasks } from '~/services/tasks'
 import { Database } from '~/types/supabase'
 import { sumUpIntervalsDuration } from '~/helpers/intervals'
 import { getCurrentTimeHoursMinutesSecondsFormat } from '~/helpers/time'
+import { useDisplay } from 'vuetify'
 
 definePageMeta({
   middleware: 'auth'
@@ -70,6 +45,22 @@ definePageMeta({
 const tasksStore = useTasksStore()
 const user = useSupabaseUser()
 const client = useSupabaseClient<Database>()
+
+const { smAndDown } = useDisplay()
+
+const mobileHeaders = [
+  { title: 'Name', key: 'name' },
+  { title: 'Task type', key: 'type' },
+]
+
+const desktopHeaders = [
+  { title: 'Name', key: 'name' },
+  { title: 'Task type', key: 'type' },
+  { title: 'Is finished', key: 'is_finished' },
+  { title: 'Created at', key: 'created_at' },
+  { title: 'Duration', key: 'duration' },
+  { title: 'Go to task', key: 'go_to_task' },
+]
 
 const getTaskDurationInHoursMinutesSecondsFormat = (taskId: string): string => {
   const intervals = tasksStore.allIntervals.filter(interval => interval.task_id === taskId)

@@ -12,7 +12,7 @@
       <v-col cols="12">
         <div class="table-container">
           <v-data-table
-            :headers="headers"
+            :headers="smAndDown ? mobileHeaders : desktopHeaders"
             :items="tasksStore.currentTaskIntervals"
             :loading="loading"
             class="elevation-1"
@@ -52,21 +52,19 @@ const uiStore = useUIStore()
 const client = useSupabaseClient<Database>()
 const tasksStore = useTasksStore()
 
-const { mobile } = useDisplay()
+const { smAndDown } = useDisplay()
 
-const headers = computed(() => {
-  return mobile ?
-    [
-      { title: 'Duration', key: 'duration' },
-      { title: 'Rate interval', key: 'rating' },
-    ]
-    : [
-      { title: 'Started at', key: 'created_at' },
-      { title: 'Paused/finished at', key: 'finished_at' },
-      { title: 'Duration', key: 'duration' },
-      { title: 'Rate interval', key: 'rating' },
-    ]
-})
+const mobileHeaders = [
+  { title: 'Duration', key: 'duration' },
+  { title: 'Rate interval', key: 'rating' },
+]
+
+const desktopHeaders = [
+  { title: 'Started at', key: 'created_at' },
+  { title: 'Paused/finished at', key: 'finished_at' },
+  { title: 'Duration', key: 'duration' },
+  { title: 'Rate interval', key: 'rating' },
+]
 
 const loading = ref(false)
 
@@ -94,13 +92,6 @@ const getDuration = (interval: Database['public']['Tables']['intervals']['Row'])
 
 <style scoped lang="scss">
 .table-container {
-  max-width: 374px;
-}
-.table {
   max-width: 100%;
-
-  tr {
-    max-width: 100%
-  }
 }
 </style>
