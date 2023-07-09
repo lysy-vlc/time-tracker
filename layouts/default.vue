@@ -76,24 +76,29 @@ const dynamicComponents = {
 
 const dialogComponent =  computed(() => defineComponent(dynamicComponents[uiStore.overlayContent]))
 
-const navItems = [
-  {
-    name: 'Tasks',
-    path: '/tasks'
-  },
-  {
-    name: 'Create task',
-    path: '/tasks/create-task'
-  },
-  {
-    name: 'Login',
-    path: '/auth/login'
-  },
-  {
-    name: 'Create account',
-    path: '/auth/create-account'
-  }
-]
+const navItems = computed(() => (
+  user.value ? [
+    {
+      name: 'Tasks',
+      path: '/tasks'
+    },
+    {
+      name: 'Create task',
+      path: '/tasks/create-task'
+    },
+  ]
+  :
+  [
+    {
+      name: 'Login',
+      path: '/auth/login'
+    },
+    {
+      name: 'Create account',
+      path: '/auth/create-account'
+    }
+  ]
+))
 
 const logout = async () => {
   const client = useSupabaseAuthClient()
