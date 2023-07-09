@@ -1,10 +1,10 @@
 <template>
   <v-row>
-    <v-col cols="6">
+    <v-col cols="6" class="d-none d-md-flex">
       <HexagonalSpinner width="100%" height="100%" :animate="false"/>
     </v-col>
 
-    <v-col cols="6">
+    <v-col cols="12" md="6">
       <CreateTaskForm @on-create-task="createTask"/>
     </v-col>
   </v-row>
