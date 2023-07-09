@@ -113,9 +113,9 @@ onMounted(async () => {
   client.auth.onAuthStateChange((event, session) => {
     if (session?.user?.aud !== 'authenticated'
       && (route.name !== 'auth-create-account'
-        || route.name !== 'auth-login'
-        || route.name !== 'auth'
-        || route.name !== 'account'
+        && route.name !== 'auth-login'
+        && route.name !== 'auth'
+        && route.name !== 'account'
       )
     ) {
       uiStore.showOverlay('login-form')
