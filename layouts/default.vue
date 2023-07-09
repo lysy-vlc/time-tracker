@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-app-bar :elevation="2" prominent>
+    <v-app-bar :elevation="2">
       <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title>TimeTracker</v-toolbar-title>
@@ -12,7 +12,8 @@
 
     <v-navigation-drawer
       v-model="drawer"
-      temporary
+      position="left"
+      :permanent="!smAndDown"
     >
       <v-list nav>
         <template v-for="(navItem, index) in navItems">
@@ -50,8 +51,12 @@
 </template>
 
 <script setup>
-import { useUIStore } from '~/stores/ui'
 import Login from '~/components/organisms/LoginForm.vue'
+import { useUIStore } from '~/stores/ui'
+import { useDisplay } from 'vuetify'
+
+const { smAndDown } = useDisplay()
+
 
 const uiStore = useUIStore()
 
@@ -71,24 +76,29 @@ const dynamicComponents = {
 
 const dialogComponent =  computed(() => defineComponent(dynamicComponents[uiStore.overlayContent]))
 
-const navItems = [
-  {
-    name: 'Tasks',
-    path: '/tasks'
-  },
-  {
-    name: 'Create task',
-    path: '/tasks/create-task'
-  },
-  {
-    name: 'Login',
-    path: '/auth/login'
-  },
-  {
-    name: 'Create account',
-    path: '/auth/create-account'
-  }
-]
+const navItems = computed(() => (
+  user.value ? [
+    {
+      name: 'Tasks',
+      path: '/tasks'
+    },
+    {
+      name: 'Create task',
+      path: '/tasks/create-task'
+    },
+  ]
+  :
+  [
+    {
+      name: 'Login',
+      path: '/auth/login'
+    },
+    {
+      name: 'Create account',
+      path: '/auth/create-account'
+    }
+  ]
+))
 
 const logout = async () => {
   const client = useSupabaseAuthClient()
@@ -103,9 +113,9 @@ onMounted(async () => {
   client.auth.onAuthStateChange((event, session) => {
     if (session?.user?.aud !== 'authenticated'
       && (route.name !== 'auth-create-account'
-        || route.name !== 'auth-login'
-        || route.name !== 'auth'
-        || route.name !== 'account'
+        && route.name !== 'auth-login'
+        && route.name !== 'auth'
+        && route.name !== 'account'
       )
     ) {
       uiStore.showOverlay('login-form')

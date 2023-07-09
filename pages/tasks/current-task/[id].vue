@@ -5,6 +5,7 @@
     :time="displayTime"
     :title="tasksStore.currentTask?.name"
     :isCounterOn="isCounterOn"
+    :is-loading="loading"
     @on-start="startCounter"
     @on-pause="pauseCounter"
     @on-stop="finishCounter"
@@ -36,6 +37,8 @@ const uiStore = useUIStore()
 
 const displayTime = ref('')
 const isCounterOn = ref(false)
+const loading = ref(false)
+
 let counter: undefined | number = undefined
 
 const fetchCurrentTask = async () => {
@@ -53,6 +56,8 @@ const fetchCurrentTask = async () => {
 
 const getCurrentIntervals = async () => {
   const { intervals, error } = await fetchCurrentTaskIntervals(route.params.id as string, client)
+
+  console.log(intervals)
 
   if (intervals) {
     tasksStore.setCurrentTaskIntervals(intervals)
@@ -79,19 +84,26 @@ const count = () => {
 }
 
 const finishCounter = async () => {
-  if (tasksStore.currentTask && !tasksStore.currentTask) {
+  loading.value = true
+
+  if (tasksStore.currentTask) {
     const lastInterval = [ ...tasksStore.currentTaskIntervals ].pop()
     const finishedInterval = await finishInterval(lastInterval?.id as string, client)
+
+    if (finishedInterval.data) await tasksStore.updateLastInterval(finishedInterval.data[0])
     const { data, error } = await finishTask(tasksStore.currentTask.id, client)
 
     if (data) {
-      tasksStore.updateLastInterval(data[0])
+      tasksStore.setCurrentTask(data[0])
       isCounterOn.value = false
       clearInterval(counter)
     }
 
+    loading.value = false
+
     return
   }
+  loading.value = false
 
   uiStore.showSnackbar('Task has been finished', 'success')
   return navigateTo('/tasks/create-task')
@@ -110,6 +122,8 @@ const startCounter = async () => {
 }
 
 const pauseCounter = async () => {
+  loading.value = true
+
   const lastInterval = [ ...tasksStore.currentTaskIntervals ].pop()
 
   if (lastInterval) {
@@ -120,6 +134,8 @@ const pauseCounter = async () => {
 
       isCounterOn.value = false
       clearInterval(counter)
+
+      loading.value = false
     }
   }
 }
@@ -132,9 +148,7 @@ const showCurrentTimeSpent = () => {
 
 // @ts-ignore
 onMounted(async () => {
-  if (!tasksStore.currentTask) {
-    await Promise.all([fetchCurrentTask(), getCurrentIntervals()])
-  }
+  await Promise.all([fetchCurrentTask(), getCurrentIntervals()])
 
   const lastInterval = [ ...tasksStore.currentTaskIntervals ].pop()
 
